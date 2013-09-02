@@ -54,6 +54,7 @@ open (TEMP, ">$temp_tab")
 
 # Get number of columns
 my $num_cols = scalar @col_names;
+print STDERR "Number of columns:\t$num_cols\n";
 
 LINE: foreach my $line (<TAB>) {
 
@@ -61,27 +62,30 @@ LINE: foreach my $line (<TAB>) {
 	
 	# Skip if this is indel (Length of @data will be less than $num_cols)
 	if ((scalar @data) < $num_cols) {
+		print STDERR "Skipping indel.\n";
 		next LINE;
 	}
 	
 	# Skip if any basepairs are actually 2 or more together
-	for (my $i = 2; $i < $num_cols; $i++) {
+	for (my $i = 3; $i < $num_cols; $i++) {
 		
 		my $bp = $data[$i]; 
 		chomp $bp;
 		if ($bp =~ /\w{2,}/) {
+			print STDERR "Skipping multi-basepair insertion.\n";
 			next LINE;
 		}
 	}
 
 	if ($exclude_het) {
 		# Exclude heterozygotes. Keep only fixed SNPs
-		for (my $i = 2; $i < $num_cols; $i++) {
+		for (my $i = 3; $i < $num_cols; $i++) {
 			
 			my $bp = $data[$i]; 
 			chomp $bp;
 			if ($bp =~ /(\w)\/(\w)/) {
 				if ($1 ne $2) {
+					print STDERR "Skipping heterozygote. Edit script to retain.\n";
 					next LINE;
 				}
 			}
@@ -120,10 +124,17 @@ for (my $i = 3; $i < $num_cols; $i++) {
 		# Infer and print basepair. There are a few possibilities 
 		
 		# If we're reference, just print basepair
+		# (The script now starts with the 4th column, 
+		# so this is no longer possible.)
 		if ($i == 2) {
 			print $nuc;
 			$count++;
 		
+		# Haploid
+		} elsif ($nuc =~ /(\w)\/$/) {
+			print $1;
+			$count++;
+				
 		# Missing data
 		} elsif ($nuc eq './') {
 			print '-';
