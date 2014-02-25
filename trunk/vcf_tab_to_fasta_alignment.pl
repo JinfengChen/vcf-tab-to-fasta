@@ -9,11 +9,26 @@
 #	chr10	94056	T	./	./	./	./	./	C/C
 #	chr10	94180	G	./	A/A	./	./	./	./
 
-
 use strict;
 use warnings;
+use Getopt::Long;
 
-my $exclude_het = 0;
+my $exclude_het = 0;	# Should we exclude heterozygous SNPs?
+my $output_ref  = 0;	# Should we output the reference calls?
+my $input_tab;
+
+my $usage = "usage: $0 [--exclude_het] [--output_ref] -i input.tab";
+
+my $result = GetOptions (	"exclude_het"	=> \$exclude_het,
+							"output_ref"	=> \$output_ref,
+							"i=s"			=> \$input_tab
+						) or die "Incorrect usage. $usage\n";
+
+my $starting_col = 3;
+if ($output_ref) {
+	print STDERR "Including reference sequence. Remove --output_ref flag to exclude.\n";
+	$starting_col = 2;
+}
 
 my %iupac = (
 			'G/G' => 'G',
@@ -36,9 +51,6 @@ my %iupac = (
 
 			'./.' => '.',
 		);
-
-my $input_tab = shift;
-chomp $input_tab;
 
 open (TAB, "<$input_tab")
 	or die "ERROR: Could not open input file $input_tab.\n";
@@ -67,7 +79,7 @@ LINE: foreach my $line (<TAB>) {
 	}
 	
 	# Skip if any basepairs are actually 2 or more together
-	for (my $i = 3; $i < $num_cols; $i++) {
+	for (my $i = $starting_col; $i < $num_cols; $i++) {
 		
 		my $bp = $data[$i]; 
 		chomp $bp;
@@ -79,13 +91,14 @@ LINE: foreach my $line (<TAB>) {
 
 	if ($exclude_het) {
 		# Exclude heterozygotes. Keep only fixed SNPs
-		for (my $i = 3; $i < $num_cols; $i++) {
+		for (my $i = $starting_col; $i < $num_cols; $i++) {
 			
 			my $bp = $data[$i]; 
 			chomp $bp;
 			if ($bp =~ /(\w)\/(\w)/) {
 				if ($1 ne $2) {
-					print STDERR "Skipping heterozygote. Edit script to retain.\n";
+					print STDERR "Skipping heterozygote. ";
+					print STDERR "Remove --exclude_het flag to retain.\n";
 					next LINE;
 				}
 			}
@@ -101,7 +114,7 @@ close TEMP;
 
 # Now convert cleaned tabular file to FASTA alignment
 
-for (my $i = 3; $i < $num_cols; $i++) {
+for (my $i = $starting_col; $i < $num_cols; $i++) {
 
 	my $ind = $col_names[$i];
 	chomp $ind;
@@ -124,8 +137,6 @@ for (my $i = 3; $i < $num_cols; $i++) {
 		# Infer and print basepair. There are a few possibilities 
 		
 		# If we're reference, just print basepair
-		# (The script now starts with the 4th column, 
-		# so this is no longer possible.)
 		if ($i == 2) {
 			print $nuc;
 			$count++;
