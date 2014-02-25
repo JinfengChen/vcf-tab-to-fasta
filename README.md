@@ -17,7 +17,15 @@ This will make a file that looks like this:
 
 Hopefully with less missing data. Then you can convert this into a FASTA alignment with:
 
-	perl vcf_tab_to_fasta_alignment.pl snps.tab > all_snps.fasta
+	perl vcf_tab_to_fasta_alignment.pl -i snps.tab > all_snps.fasta
+
+Add the optional `--exclude_het` flag to exclude heterozygous sites:
+
+	perl vcf_tab_to_fasta_alignment.pl --exclude_het -i snps.tab > no_hets.fasta
+
+Add the optional `--output_ref` flag to output the reference genome allele:
+
+	perl vcf_tab_to_fasta_alignment.pl --output_ref -i snps.tab > all_snps_with_ref.fasta
 
 ---
 
@@ -28,7 +36,7 @@ First check out the script and associated data with this command:
 	svn checkout http://vcf-tab-to-fasta.googlecode.com/svn/trunk/ vcf-tab-to-fasta
 
 This should download everything into a directory named vcf-tab-to-fasta. There are some 
-small vcf-tab example files in the example\_files directory, named chr22snps\_head.tab and 
+small vcf-tab example files in the example\_data directory, named chr22snps\_head.tab and 
 chrYsnps\_head.tab. These were created using the [VCFtools](http://vcftools.sourceforge.net/) utility [vcf-to-tab](http://vcftools.sourceforge.net/perl_module.html#vcf-to-tab):
 
 Once that's done, move into the directory:
@@ -37,17 +45,17 @@ Once that's done, move into the directory:
 
 We can run the script to concatenate SNPs into a FASTA format file. First for chromosome 22:
 
-	perl vcf_tab_to_fasta_alignment.pl example_files/chr22snps_head.tab > chr22snps_head.fasta
+	perl vcf_tab_to_fasta_alignment.pl -i example_data/chr22snps_head.tab > chr22snps_head.fasta
 
 And then for chromosome Y:
 
-	perl vcf_tab_to_fasta_alignment.pl example_files/chrYsnps_head.tab > chrYsnps_head.fasta
+	perl vcf_tab_to_fasta_alignment.pl -i example_data/chrYsnps_head.tab > chrYsnps_head.fasta
 
 Now there should be two new FASTA files, chr22snps\_head.fasta and chrYsnps\_head.fasta. 
 Let's make sure everthing worked OK. We can look at the 4th column of the chr22 tab data with
 this command:
 
-	awk '{print $4}' example_files/chr22snps_head.tab
+	awk '{print $4}' example_data/chr22snps_head.tab
 
 The result is this:
 
@@ -73,7 +81,7 @@ The result is this. (Remember, S is the IUPAC code for G or C.)
 
 Similarly, for the haploid Y data, the sixth column can be viewed with:
 
-	awk '{print $6}'  example_files/chrYsnps_head.tab
+	awk '{print $6}'  example_data/chrYsnps_head.tab
 
 Which results in:
 
@@ -118,8 +126,8 @@ Make a tabular VCF file with [VCFtools](http://vcftools.sourceforge.net/) utilit
 
 Download script from [this Google Drive folder](https://drive.google.com/folderview?id=0B3JtKm_03RZDRmVPWk96ZEZHOHc&usp=sharing "Download link")
 
-Finally, concatenate SNPs into a FASTA format file with vcf_tab_to_fasta_alignment:
+Finally, concatenate SNPs into a FASTA format file with `vcf_tab_to_fasta_alignment`:
 
-	perl vcf_tab_to_fasta_alignment.pl chr22snps.tab > chr22snps.fasta
-	perl vcf_tab_to_fasta_alignment.pl chrYsnps.tab  > chrYsnps.fasta
+	perl vcf_tab_to_fasta_alignment.pl -i chr22snps.tab > chr22snps.fasta
+	perl vcf_tab_to_fasta_alignment.pl -i chrYsnps.tab  > chrYsnps.fasta
 
