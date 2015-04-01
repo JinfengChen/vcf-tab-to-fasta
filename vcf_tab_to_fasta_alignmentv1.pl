@@ -134,7 +134,7 @@ LINE: foreach my $line (<TAB>) {
 close TAB;
 
 my $outfile = "$input_tab.fasta";
-open (OUT, $outfile) or die "ERROR: Could not open output fasta file $outfile.\n";
+open (OUT, ">$outfile") or die "ERROR: Could not open output fasta file $outfile.\n";
 foreach my $i (sort {$a <=> $b} keys %hash){
 	my $ind = $col_names[$i];
 	chomp $ind;
